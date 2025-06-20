@@ -1,0 +1,23 @@
+units real
+atom_style full
+
+boundary p p p
+
+read_data ../inputs/coarse_grained_cellulose.data
+
+group cl1 type 1
+group cl2 type 2
+group cl3 type 3
+group cl type 1 2 3
+
+mass 1 68.0
+mass 2 60.0
+mass 3 34.0
+
+bond_style hybrid harmonic class2
+angle_style hybrid harmonic class2
+improper_style harmonic
+pair_style none
+
+angle_coeff * class2 bb 0.0 1.0 2.0
+angle_coeff * class2 ba 0.0 0.0 1.0 2.0

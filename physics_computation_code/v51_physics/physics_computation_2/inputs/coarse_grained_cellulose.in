@@ -1,0 +1,76 @@
+units real
+atom_style full
+
+boundary p p p
+
+read_data ../inputs/coarse_grained_cellulose.data
+
+group cl1 type 1
+group cl2 type 2
+group cl3 type 3
+group cl type 1 2 3
+
+mass 1 58.0
+mass 2 44.0
+mass 3 60.0
+
+bond_style harmonic
+angle_style harmonic
+improper_style harmonic
+pair_style none
+
+bond_coeff 1  62.00 5.273 # CL1-CL1
+bond_coeff 2  51.00 2.188 # CL2-CL1
+bond_coeff 3 136.39 2.353 # CL3-CL1
+
+angle_coeff 1 30.00 161.9 # CL1-CL1-CL1
+angle_coeff 2 14.96 109.8 # CL2-CL1-CL1_1
+angle_coeff 3 25.89  81.5 # CL3-CL1-CL1_1
+angle_coeff 4 17.65  87.9 # CL2-CL1-CL1_2
+angle_coeff 5 20.77  80.4 # CL3-CL1-CL1_2
+angle_coeff 6 10.82 167.3 # CL2-CL1-CL3
+
+improper_coeff 1 0.25 176.9 # CL1-CL1-CL1-CL1
+improper_coeff 2 0.22   2.0 # CL2-CL1-CL1-CL3
+improper_coeff 3 0.23   2.1 # CL3-CL1-CL1-CL2
+
+timer timeout 0:09:00 every 1000
+
+fix relaxation cl1 spring/self 10.0
+minimize 1.0e-4 1.0e-6 100 1000
+unfix relaxation
+reset_timestep 0
+
+fix 0 all langevin 300.0 300.0 $(4000.0*dt) 114514
+
+fix recenter all recenter INIT INIT INIT
+
+#fix momentum all momentum 100 linear 1 1 1 angular
+
+dump 1 cl custom 1000 cl_relaxation id mol type q x y z fx fy fz
+dump_modify 1 sort id
+
+#fix boxsizepressurerelaxation all ave/time 1000 1 1000 v_lx v_ly v_lz v_px v_py v_pz file box_size-pressure_relaxation mode scalar
+
+#compute clmsd cl msd com yes average no
+#fix clmsd cl ave/time 1000 1 1000 c_clmsd[*] file cl_msd_relaxation mode scalar
+
+#fix 1 all nve
+fix 1 all nvt temp 300.0 300.0 $(100.0*dt)
+#fix 1 all npt temp 300.0 300.0 $(100.0*dt) aniso 1.0 1.0 $(100.0*dt)
+
+velocity all create 300.0 114514
+
+timestep 2.0
+thermo 1000
+thermo_modify flush yes
+thermo_style custom step temp epair emol etotal pxx pyy pzz
+run 5000
+
+timestep 4.0
+thermo 1000
+thermo_modify flush yes
+thermo_style custom step temp epair emol etotal pxx pyy pzz
+run 1000000
+
+

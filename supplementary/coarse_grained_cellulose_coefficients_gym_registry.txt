@@ -1,0 +1,15 @@
+# Copy 'eipifun_env_pool' folder to gymnasium.envs.eipifun_env_pool
+# Add following code to gymnasium.envs.__init__
+
+# eipifun
+
+for target_version in ('v21','v22','v23','v24','v25','v31','v32','v33','v34','v35','v41','v42','v43','v44','v45','v51','v52','v53','v54','v55'):
+
+    register(
+        id='{}CoarseGrainedCelluloseCoefficientsEnv-v0'.format(target_version),
+        entry_point='gymnasium.envs.eipifun_env_pool.cll_cg_envs.{}_coarse_grained_cellulose_coefficients_env:CoarseGrainedCelluloseCoefficientsEnv'.format(target_version),
+        max_episode_steps=1000,
+        reward_threshold=1000,
+    )
+
+
